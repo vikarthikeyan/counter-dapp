@@ -1,4 +1,4 @@
-pragma solidity ^0.5.2; 
+pragma solidity ^0.5.0; 
 // imagine a big integer counter that the whole world could share
 contract Counter {
     uint value; 

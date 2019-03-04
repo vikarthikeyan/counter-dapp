@@ -41,13 +41,6 @@ width: 30px;
   font-size: 25px;
 }
 
-.initialise
-{
-  
-  text-align: center;
-  margin-left: 10px;
-} 
-
 .three-inline-buttons {
      margin-top: 30px;
      position: relative;
@@ -55,12 +48,16 @@ width: 30px;
      margin: 0 auto;
 }
 
-#inp
+#incInput,#decInput,#initInput
 {
  height:22px;
  width: 40px;
 }
 
+#incInput,#decInput
+{
+  margin-left: 14px;
+}
 hr {
   margin: auto;
   width: 40%;
