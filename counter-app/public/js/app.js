@@ -3,8 +3,6 @@ App = {
   contracts: {},
   names: new Array(),
   url: 'http://127.0.0.1:9545',
-  chairPerson:null,
-  currentAccount:null,
     init: function() {
     return App.initWeb3();
   },
@@ -65,7 +63,10 @@ App = {
         if(result){
             console.log(result.receipt.status);
             if(parseInt(result.receipt.status) == 1)
+            {
             alert("Value Incremented successfully")
+            location.reload();
+            }
             else
             alert(addr + " registration not done successfully due to revert")
         } else {
@@ -105,7 +106,10 @@ App = {
             console.log(result.receipt.status);
             console.log(result);
             if(parseInt(result.receipt.status) == 1)
+            {
             alert("Decrement Done successfully")
+            location.reload();
+          }
             else
             alert(addr + " registration not done successfully due to revert")
         } else {
@@ -128,7 +132,10 @@ App = {
             console.log(result.receipt.status);
             console.log(result);
             if(parseInt(result.receipt.status) == 1)
+            {
             alert("Counter has been initialised")
+            location.reload();
+          }
             else
             alert(addr + " registration not done successfully due to revert")
         } else {
