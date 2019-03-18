@@ -37,7 +37,7 @@ App = {
   bindEvents: function() {
     $(document).on('click', '#increment', App.increment);
     $(document).on('click', '#decrement', App.decrement);
-    $(document).on('click', '#init',App.initialise);
+    $(document).on('click', '#init',App.initialize);
     $(".value").text(App.getValue());
   },
 
@@ -56,7 +56,7 @@ App = {
     
     var voteInstance;
     App.contracts.vote.deployed().then(function(instance) {
-      var increment = $('#incInput').val();
+      var increment = $('#numberInput').val();
       voteInstance = instance;
       return voteInstance.increment(increment);
     }).then(function(result, err){
@@ -98,7 +98,7 @@ App = {
 
     var voteInstance;
     App.contracts.vote.deployed().then(function(instance) {
-      var decrement = $('#decInput').val();
+      var decrement = $('#numberInput').val();
       voteInstance = instance;
       return voteInstance.decrement(decrement);
     }).then(function(result, err){
@@ -119,21 +119,21 @@ App = {
 },
 
 
- initialise: function(){
+ initialize: function(){
     console.log("hereree");
     var voteInstance;
     App.contracts.vote.deployed().then(function(instance) {
-      var initialise = $('#initInput').val();
-      console.log(initialise);
+      var initialize = $('#numberInput').val();
+      console.log(initialize);
       voteInstance = instance;
-      return voteInstance.initialize(initialise);
+      return voteInstance.initialize(initialize);
     }).then(function(result, err){
         if(result){
             console.log(result.receipt.status);
             console.log(result);
             if(parseInt(result.receipt.status) == 1)
             {
-            alert("Counter has been initialised")
+            alert("Counter has been initialized")
             location.reload();
           }
             else
