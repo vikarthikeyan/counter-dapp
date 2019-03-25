@@ -1,148 +1,129 @@
 App = {
   web3Provider: null,
-  contracts: {},
-  names: new Array(),
+  counterInstance: null,
   url: 'http://127.0.0.1:9545',
-    init: function() {
+
+  init: function() {
     return App.initWeb3();
   },
 
   initWeb3: function() {
-        // Is there is an injected web3 instance?
-    if (typeof web3 !== 'undefined') {
-      App.web3Provider = web3.currentProvider;
-    } else {
-      // If no injected web3 instance is detected, fallback to the TestRPC
-      App.web3Provider = new Web3.providers.HttpProvider(App.url);
-    }
+    App.web3Provider = new Web3.providers.HttpProvider(App.url);
     web3 = new Web3(App.web3Provider);
-    
-    App.populateAddress();
+    App.populateAddress(web3);
     return App.initContract();
-    
   },
 
   initContract: function() {
-      $.getJSON('Counter.json', function(data) {
-    // Get the necessary contract artifact file and instantiate it with truffle-contract
-    var voteArtifact = data;
-    App.contracts.vote = TruffleContract(voteArtifact);
+    $.getJSON('Counter.json', function(counterArtifact) {
 
-    // Set the provider for our contract
-    App.contracts.vote.setProvider(App.web3Provider);
-    return App.bindEvents();
-  });
+      App.counterInstance = new web3.eth.Contract(counterArtifact.abi, '0xB807cc1760747CF92dC6218218FcCE176C00eBa9');
+
+      // Set default account to first account for now
+      web3.eth.defaultAccount = web3.eth.accounts[0];
+
+      return App.bindEvents();
+    });
   },
 
   bindEvents: function() {
     $(document).on('click', '#increment', App.increment);
     $(document).on('click', '#decrement', App.decrement);
     $(document).on('click', '#init',App.initialize);
-    $(".value").text(App.getValue());
+    App.getValue();
   },
 
-  populateAddress : function(){
-    new Web3(new Web3.providers.HttpProvider(App.url)).eth.getAccounts((err, accounts) => {
-      jQuery.each(accounts,function(i){
-        if(web3.eth.coinbase != accounts[i]){
-          var optionElement = '<option value="'+accounts[i]+'">'+accounts[i]+'</option';
-          jQuery('#enter_address').append(optionElement);  
+  populateAddress : function(web3){
+    web3.eth.getAccounts(function(err, accounts){
+      $.each(accounts,function(i){
+        if(i==0) {
+         var optionElement = '<option value="'+accounts[i]+'" selected>'+accounts[i]+'</option>';
+        } else {
+         var optionElement = '<option value="'+accounts[i]+'">'+accounts[i]+'</option>';
         }
+         $('#eth-addresses').append(optionElement);  
+      });
+    });
+  },
+
+  getCurrentAccount: function() {
+    return $("#eth-addresses option:selected").text();
+  },
+
+  getValue: function(){
+    App.counterInstance.methods.get().call(function(err, result){
+      $(".value").text(result);
+   });
+  },
+
+  sendTransactionToNetwork: function(tx, privateKey){
+    web3.eth.accounts.signTransaction(tx, privateKey, function(err, result){
+      web3.eth.sendSignedTransaction(result.rawTransaction).on('receipt', function(receipt){
+        if(receipt.status) {
+          location.reload();
+        }
+      }).on('error', function(error){
+        console.log(error);
       });
     });
   },
 
   increment: function(){
     
-    var voteInstance;
-    App.contracts.vote.deployed().then(function(instance) {
-      var increment = $('#numberInput').val();
-      voteInstance = instance;
-      return voteInstance.increment(increment);
-    }).then(function(result, err){
-        if(result){
-            console.log(result.receipt.status);
-            if(parseInt(result.receipt.status) == 1)
-            {
-            alert("Value Incremented successfully")
-            location.reload();
-            }
-            else
-            alert(addr + " registration not done successfully due to revert")
-        } else {
-            alert(addr + " registration failed")
-        }   
-    });
-},
+    var value = $('#numberInput').val();
+    web3.eth.defaultAccount = App.getCurrentAccount();
 
-  getValue: function(){
+    var privateKey = "0xe834c4fcdd7e05721fab0ffc83c9f40cb2188c2ab4c90b39eb0028e7b16f53c7"
 
-    var voteInstance;
-    App.contracts.vote.deployed().then(function(instance) {
-      voteInstance = instance;
-      return voteInstance.get();
-    }).then(function(result, err){
-        if(result){
-            $(".value").text(result.c[0]);
-            
-        } 
-        else
-        {
-          console.log(err);
-        }
-    });
-},
+    const fnc = App.counterInstance.methods.increment(value).encodeABI();
 
+    const tx = {
+      gas: 1000000,
+      data: fnc,
+      value: 0,
+      to: '0xB807cc1760747CF92dC6218218FcCE176C00eBa9'
+    }
+
+    App.sendTransactionToNetwork(tx, privateKey);
+  },
 
   decrement: function(){
 
-    var voteInstance;
-    App.contracts.vote.deployed().then(function(instance) {
-      var decrement = $('#numberInput').val();
-      voteInstance = instance;
-      return voteInstance.decrement(decrement);
-    }).then(function(result, err){
-        if(result){
-            console.log(result.receipt.status);
-            console.log(result);
-            if(parseInt(result.receipt.status) == 1)
-            {
-            alert("Decrement Done successfully")
-            location.reload();
-          }
-            else
-            alert(addr + " registration not done successfully due to revert")
-        } else {
-            alert(addr + " registration failed")
-        }   
-    });
-},
+    var value = $('#numberInput').val();
+    web3.eth.defaultAccount = App.getCurrentAccount();
 
+    var privateKey = "0xe834c4fcdd7e05721fab0ffc83c9f40cb2188c2ab4c90b39eb0028e7b16f53c7"
 
- initialize: function(){
-    console.log("hereree");
-    var voteInstance;
-    App.contracts.vote.deployed().then(function(instance) {
-      var initialize = $('#numberInput').val();
-      console.log(initialize);
-      voteInstance = instance;
-      return voteInstance.initialize(initialize);
-    }).then(function(result, err){
-        if(result){
-            console.log(result.receipt.status);
-            console.log(result);
-            if(parseInt(result.receipt.status) == 1)
-            {
-            alert("Counter has been initialized")
-            location.reload();
-          }
-            else
-            alert(addr + " registration not done successfully due to revert")
-        } else {
-            alert(addr + " registration failed")
-        }   
-    });
-} 
+    const fnc = App.counterInstance.methods.decrement(value).encodeABI();
+
+    const tx = {
+      gas: 1000000,
+      data: fnc,
+      value: 0,
+      to: '0xB807cc1760747CF92dC6218218FcCE176C00eBa9'
+    }
+
+    App.sendTransactionToNetwork(tx, privateKey);
+  },
+
+  initialize: function(){
+
+    var value = $('#numberInput').val();
+    web3.eth.defaultAccount = App.getCurrentAccount();
+
+    var privateKey = "0xe834c4fcdd7e05721fab0ffc83c9f40cb2188c2ab4c90b39eb0028e7b16f53c7"
+
+    const fnc = App.counterInstance.methods.initialize(value).encodeABI();
+
+    const tx = {
+      gas: 1000000,
+      data: fnc,
+      to: '0xB807cc1760747CF92dC6218218FcCE176C00eBa9'
+    }
+
+    App.sendTransactionToNetwork(tx, privateKey);
+    
+  } 
 };
 
 $(function() {
