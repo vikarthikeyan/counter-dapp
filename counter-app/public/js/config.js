@@ -1,0 +1,2 @@
+var contract_address = "0xB807cc1760747CF92dC6218218FcCE176C00eBa9"
+var private_key = "0xe834c4fcdd7e05721fab0ffc83c9f40cb2188c2ab4c90b39eb0028e7b16f53c7"
