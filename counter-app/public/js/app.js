@@ -16,6 +16,8 @@ App = {
       App.web3Provider = new Web3.providers.HttpProvider(App.url);
     }
     web3 = new Web3(App.web3Provider);
+
+    ethereum.enable();
     
     App.populateAddress();
     return App.initContract();
